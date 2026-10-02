@@ -63,5 +63,58 @@ The main wireframes represent the core user journeys and role-based dashboards o
 
 [View the NI'MA Wireframes on Excalidraw](https://excalidraw.com/#json=9SUurKkLgBeb_STEJbZyB,D1y8F7jMOhDz4KHR5wKu4g)
 
+## ERD
+<img src="assets/NI&apos;MA ERD (2).jpeg" alt="NI'MA ERD"/>
+
 ## Backend Routes
+
+### Authentication
+| Method | Route | Access | Description |
+|--------|-------|--------|-------------|
+| POST | `/api/auth/register` | Public | Register as client or collector |
+| POST | `/api/auth/login` | Public | Login (form data: `username` = email, `password`), returns JWT |
+| GET | `/api/auth`  | Any | Get my profile |
+| PUT | `/api/auth`  | Any | Update my name, phone, or area |
+
+### Items
+| Method | Route | Access | Description |
+|--------|-------|--------|-------------|
+| POST | `/api/items`  | Client | Create an item |
+| GET | `/api/items`  | Client, Admin | List items (client: own, admin: all). Filters: `category`, `condition`, `is_available` |
+| GET | `/api/items/{id}`  | Client (owner), Admin | Get one item |
+| PUT | `/api/items/{id}`  | Client (owner) | Update an item (blocked while it has an active donation) |
+| POST | `/api/items/{id}/image`  | Client (owner) | Upload item photo |
+| DELETE | `/api/items/{id}`  | Client (owner), Admin | Delete an item |
+
+### Donations
+| Method | Route | Access | Description |
+|--------|-------|--------|-------------|
+| POST | `/api/donations`  | Client | Submit a donation request for an available item |
+| GET | `/api/donations`  | Any | List donations by role (client: own, collector: assigned, admin: all). Filter: `status_filter` |
+| GET | `/api/donations/{id}`  | Client (owner), assigned Collector, Admin | Get donation details |
+| PUT | `/api/donations/{id}`  | Client (owner) | Update pickup address or time (pending only) |
+| PATCH | `/api/donations/{id}/cancel`  | Client (owner) | Cancel (pending → cancelled) |
+| PATCH | `/api/donations/{id}/assign`  | Admin | Assign collector (pending → assigned). Body: `collector_id` |
+| PATCH | `/api/donations/{id}/collect`  | Assigned Collector | Mark collected (assigned → collected) |
+| POST | `/api/donations/{id}/proof`  | Assigned Collector | Upload proof photo (collected only) |
+| PATCH | `/api/donations/{id}/review`  | Admin | Approve or reject proof. Body: `approved`, `note` |
+| PATCH | `/api/donations/{id}/complete`  | Admin | Complete (collected → completed, proof must be approved) |
+| DELETE | `/api/donations/{id}`  | Admin | Delete a donation |
+
+### Users (Admin)
+| Method | Route | Access | Description |
+|--------|-------|--------|-------------|
+| GET | `/api/users`  | Admin | List users. Filter: `role` |
+| GET | `/api/users/{id}`  | Admin | Get one user |
+| PATCH | `/api/users/{id}/status`  | Admin | Activate or deactivate. Body: `is_active` |
+| DELETE | `/api/users/{id}`  | Admin | Delete a user (only if no donations on record) |
+| GET | `/api/collectors`  | Admin | List active collectors for assignment |
+
+## Attributions
+
+## Technologies Used
+
+## Future Work
+
+
 
