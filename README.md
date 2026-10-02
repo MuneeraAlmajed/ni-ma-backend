@@ -110,6 +110,12 @@ The main wireframes represent the core user journeys and role-based dashboards o
 | DELETE | `/api/users/{id}`  | Admin | Delete a user (only if no donations on record) |
 | GET | `/api/collectors`  | Admin | List active collectors for assignment |
 
+
+## Component Hirerachy 
+<img src="assets/Backend_comp_hiereachy.jpeg" alt="NI'MA component hirerachy" />
+
+
+
 ## Attributions
 
 ## Technologies Used
