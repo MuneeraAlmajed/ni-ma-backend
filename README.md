@@ -3,7 +3,7 @@
   <br>
   <em>What is no longer useful to you may be valuable to someone else.</em>
   <br><br>
-  <strong>NI'MA — FastAPI Backedn</strong>
+  <strong>NI'MA — FastAPI Backend</strong>
   <br>
   <a href="https://github.com/MuneeraAlmajed/ni-ma-frontend">View the Frontend →</a>
 </p>
