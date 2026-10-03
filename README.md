@@ -1,4 +1,12 @@
-# ♻️ NI'MA
+<p align="center">
+  <img src="assets/NI'MA LOGO.png" alt="NI'MA Logo" width="200">
+  <br>
+  <em>What is no longer useful to you may be valuable to someone else.</em>
+  <br><br>
+  <strong>NI'MA — FastAPI Backedn</strong>
+  <br>
+  <a href="https://github.com/MuneeraAlmajed/ni-ma-frontend">View the Frontend →</a>
+</p>
 
 NI’MA is a web-based platform that helps people in Bahrain give unwanted but still useful items a second life by connecting Clients who want to donate items with Collectors who handle their collection.
 
@@ -15,7 +23,7 @@ NI’MA is a web-based platform that helps people in Bahrain give unwanted but s
 - 🗄️ PostgreSQL Database
 - 📖 API Documentation 
 
-## Sreenshot of NI'MA / LOGO
+## Sreenshot of NI'MA 
 
 ## Live Demo 
 🔗 [Visit NI'MA]
