@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 
@@ -33,4 +33,25 @@ def create_donation(
     
     return new_donation
 
+@router.get('/donations', response_model=list[DonationSchema])
+def get_donations(
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+    
+):
+    donations = db.query(DonationModel).filter(DonationModel.client_id == user.id).all()
+    
+    return donations
 
+@router.get('/donations/{donation_id}', response_model=DonationSchema)
+def get_donation(
+  donation_id: int,
+  db: Session = Depends(get_db),
+  user: UserModel = Depends(get_current_user)  
+):
+    donation = db.query(DonationModel).filter(DonationModel.id == donation_id, DonationModel.client_id == user.id).first()
+    
+    if not donation:
+        raise HTTPException(status_code=404, detail='Donation Not found')
+    
+    return donation

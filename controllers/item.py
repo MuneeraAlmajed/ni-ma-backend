@@ -1,21 +1,28 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database import get_db
 from dependencies.get_current_user import get_current_user
 from models.item import ItemModel
 from models.user import UserModel
+from models.donation import DonationModel
 from serializers.item import ItemCreateSchema, ItemSchema
 
 router = APIRouter()
 
-@router.post('/donationsl{donation_id}/items', response_model=ItemSchema, status_code=201)
+@router.post('/donations/{donation_id}/items', response_model=ItemSchema, status_code=201)
 def create_item(
     donation_id: int,
     item: ItemCreateSchema,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user)
 ):
+    donation = db.query(DonationModel).filter(DonationModel.id == donation_id, DonationModel.client_id == user.id).first()
+    
+    if not donation:
+        raise HTTPException(status_code=404, detail='Donation not found or you do not have access to it')
+    
+    
     new_item = ItemModel(
         donation_id=donation_id,
         name=item.name,
@@ -30,3 +37,18 @@ def create_item(
     db.refresh(new_item)
     
     return new_item
+
+@router.get('/donations/{donation_id}/items', response_model=list[ItemSchema])
+def get_items(
+    donation_id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    donation = db.query(DonationModel).filter(DonationModel.id == donation_id, DonationModel.client_id == user.id).first()
+    
+    if not donation:
+        raise HTTPException(status_code=404, detail='Donation not found or you do not have access to it')
+    
+    items = db.query(ItemModel).filter(ItemModel.donation_id == donation_id).all()
+    
+    return items
