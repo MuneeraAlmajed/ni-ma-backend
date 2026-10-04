@@ -26,7 +26,7 @@ class UserModel(BaseModel):
         back_populates ='client'
     )
     
-    colleccted_donations = relationship(
+    collected_donations = relationship(
         'DonationModel',
         foreign_keys ='DonationModel.collector_id',
         back_populates='collector'

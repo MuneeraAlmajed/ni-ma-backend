@@ -8,11 +8,12 @@ from fastapi import FastAPI
 
 # Controllers
 from controllers.users import router as UsersRouter
+from controllers.donations import router as DonationRouter
+from controllers.item import router as ItemRouter
 
 
 app = FastAPI()
 
-# ✅ Allow your React dev server(s) to call the API
 origins = [
     origin.strip()
     for origin in os.getenv("CORS_ORIGINS", "").split(",")
@@ -21,12 +22,14 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,     # Which sites can call this API
-    allow_methods=["*"],       # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],       # Allow all headers (e.g., Content-Type, Authorization)
+    allow_origins=origins,    
+    allow_methods=["*"],      
+    allow_headers=["*"],       
 )
 
 app.include_router(UsersRouter, prefix='/api')
+app.include_router(DonationRouter, prefix='/api')
+app.include_router(ItemRouter, prefix='/api')
 
 @app.get('/health')
 def health_check():
