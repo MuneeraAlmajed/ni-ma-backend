@@ -101,12 +101,12 @@ The main wireframes represent the core user journeys and role-based dashboards o
 | GET | `/api/donations`  | Any | List donations by role (client: own, collector: assigned, admin: all). Filter: `status_filter` |
 | GET | `/api/donations/{id}`  | Client (owner), assigned Collector, Admin | Get donation details |
 | PUT | `/api/donations/{id}`  | Client (owner) | Update pickup address or time (pending only) |
-| PATCH | `/api/donations/{id}/cancel`  | Client (owner) | Cancel (pending → cancelled) |
-| PATCH | `/api/donations/{id}/assign`  | Admin | Assign collector (pending → assigned). Body: `collector_id` |
-| PATCH | `/api/donations/{id}/collect`  | Assigned Collector | Mark collected (assigned → collected) |
+| PUT | `/api/donations/{id}/cancel`  | Client (owner) | Cancel (pending → cancelled) |
+| PUT | `/api/donations/{id}/assign`  | Admin | Assign collector (pending → assigned). Body: `collector_id` |
+| PUT | `/api/donations/{id}/collect`  | Assigned Collector | Mark collected (assigned → collected) |
 | POST | `/api/donations/{id}/proof`  | Assigned Collector | Upload proof photo (collected only) |
-| PATCH | `/api/donations/{id}/review`  | Admin | Approve or reject proof. Body: `approved`, `note` |
-| PATCH | `/api/donations/{id}/complete`  | Admin | Complete (collected → completed, proof must be approved) |
+| PUT | `/api/donations/{id}/review`  | Admin | Approve or reject proof. Body: `approved`, `note` |
+| PUT | `/api/donations/{id}/complete`  | Admin | Complete (collected → completed, proof must be approved) |
 | DELETE | `/api/donations/{id}`  | Admin | Delete a donation |
 
 ### Users (Admin)
@@ -114,7 +114,7 @@ The main wireframes represent the core user journeys and role-based dashboards o
 |--------|-------|--------|-------------|
 | GET | `/api/users`  | Admin | List users. Filter: `role` |
 | GET | `/api/users/{id}`  | Admin | Get one user |
-| PATCH | `/api/users/{id}/status`  | Admin | Activate or deactivate. Body: `is_active` |
+| PUT | `/api/users/{id}/status`  | Admin | Activate or deactivate. Body: `is_active` |
 | DELETE | `/api/users/{id}`  | Admin | Delete a user (only if no donations on record) |
 | GET | `/api/collectors`  | Admin | List active collectors for assignment |
 
