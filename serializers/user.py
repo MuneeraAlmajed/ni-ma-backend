@@ -11,8 +11,11 @@ class UserRegistrationSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     username: str  
     password: str  
+
+class UserStatusSchema(BaseModel):
+    is_active: bool
+
     
-# Response schemas
 class UserSchema(BaseModel):
     id: int
     name: str

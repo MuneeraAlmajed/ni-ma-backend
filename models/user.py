@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from .base import BaseModel
 from passlib.context import CryptContext
@@ -19,6 +19,7 @@ class UserModel(BaseModel):
     phone = Column(String, nullable=False)  
     password = Column(String, nullable=False)
     role = Column(String, default='client', nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
     
     donations = relationship(
         'DonationModel',
