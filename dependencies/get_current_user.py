@@ -16,7 +16,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(http_be
   try:
     # Decode the token using the secret key
     payload = jwt.decode(token.credentials, JWT_SECRET, algorithms=["HS256"])
-    current_user_id =  payload.get("sub")
+    current_user_id =  int(payload.get("sub"))
 
     user = db.query(UserModel).filter(UserModel.id == current_user_id).first()
 
