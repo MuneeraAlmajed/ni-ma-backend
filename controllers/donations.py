@@ -41,8 +41,19 @@ def get_donations(
     user: UserModel = Depends(get_current_user)
     
 ):
-    donations = db.query(DonationModel).filter(DonationModel.client_id == user.id).all()
-    
+    if user.role == 'admin':
+        donations = db.query(DonationModel).all()
+
+    elif user.role == 'collector':
+        donations = db.query(DonationModel).filter(
+            DonationModel.collector_id == user.id
+        ).all()
+
+    else:
+        donations = db.query(DonationModel).filter(
+            DonationModel.client_id == user.id
+        ).all()
+        
     return donations
 
 @router.get('/donations/{donation_id}', response_model=DonationSchema)
@@ -51,12 +62,29 @@ def get_donation(
   db: Session = Depends(get_db),
   user: UserModel = Depends(get_current_user)  
 ):
-    donation = db.query(DonationModel).filter(DonationModel.id == donation_id, DonationModel.client_id == user.id).first()
-    
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == donation_id
+    ).first()
+
     if not donation:
-        raise HTTPException(status_code=404, detail='Donation Not found')
-    
-    return donation
+        raise HTTPException(
+            status_code=404,
+            detail='Donation not found'
+        )
+
+    if user.role == 'admin':
+        return donation
+
+    if user.role == 'collector' and donation.collector_id == user.id:
+        return donation
+
+    if user.role == 'client' and donation.client_id == user.id:
+        return donation
+
+    raise HTTPException(
+        status_code=403,
+        detail='You do not have access to this donation'
+    )
 
 @router.put('/donations/{donation_id}', response_model=DonationSchema)
 def update_donation(
@@ -286,3 +314,25 @@ def complete_donation(
     db.refresh(donation)
     
     return donation
+
+@router.delete('/donations/{donation_id}', status_code=204)
+def delete_donation(
+    donation_id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail = 'Only admins can delete donations')
+    
+    donation = db.query(DonationModel).filter(DonationModel.id == donation_id).first()
+    
+    if not donation:
+        raise HTTPException(status_code=404, detail='Donation not found')
+    
+    if donation.status not in ['cancelled', 'failed']:
+        raise HTTPException(status_code=400, detail='Only cancelled or failed donations can be deleted')
+    
+    db.delete(donation)
+    db.commit()
+    
+    return
