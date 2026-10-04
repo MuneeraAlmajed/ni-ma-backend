@@ -114,6 +114,7 @@ The main wireframes represent the core user journeys and role-based dashboards o
 |--------|-------|--------|-------------|
 | GET | `/api/users`  | Admin | List users. Filter: `role` |
 | GET | `/api/users/{id}`  | Admin | Get one user |
+| POST | `/api/collectors` | Admin | Create a new collector |
 | PUT | `/api/users/{id}/status`  | Admin | Activate or deactivate. Body: `is_active` |
 | DELETE | `/api/users/{id}`  | Admin | Delete a user (only if no donations on record) |
 | GET | `/api/collectors`  | Admin | List active collectors for assignment |
