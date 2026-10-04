@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 
 from database import get_db
 from dependencies.get_current_user import get_current_user
 from models.donation import DonationModel
-from serializers.donation import DonationSchema, DonationsCreateSchema, DonationUpdateSchema, DonationAssignSchema, DonationCollectSchema
+from serializers.donation import DonationSchema, DonationsCreateSchema, DonationUpdateSchema, DonationAssignSchema, DonationCollectSchema, DonationReviewSchema
 from models.user import UserModel
+
+import os
 
 router = APIRouter()
 
@@ -183,6 +185,103 @@ def collect_donation(
     else:
         donation.status = 'failed'
         
+    db.commit()
+    db.refresh(donation)
+    
+    return donation
+
+
+@router.post('/donations/{donation_id}/proof', response_model=DonationSchema)
+def upload_proof(
+    donation_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+): 
+    if user.role != 'collector':
+        raise HTTPException(status_code=403, detail='Only collectors can upload proof')
+    
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == donation_id,
+        DonationModel.collector_id == user.id
+    ).first()
+    
+    if not donation:
+        raise HTTPException(status_code=404, detail='Donation not found or you are not assigned to it')
+    
+    if donation.status != 'collected':
+        raise HTTPException(status_code=400, detail='Proof can only be uploaded for collected donations')
+    
+    file_path = f'uploads/donation_{donation_id}_{file.filename}'
+    
+    with open(file_path, 'wb') as image:
+        image.write(file.file.read())
+        
+        donation.proof_photo_url = file_path
+        
+        db.commit()
+        db.refresh(donation)
+        
+        return donation
+    
+@ router.put('/donations/{donation_id}/review', response_model=DonationSchema)
+def review_donation(
+    donation_id: int,
+    data: DonationReviewSchema,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail='Only admins can review donation proof')
+    
+    donation = db.query(DonationModel).filter(DonationModel.id == donation_id).first()
+    
+    if not donation:
+        raise HTTPException(status_code=404, detail='Donation not found')
+    
+    if donation.status != 'collected':
+        raise HTTPException(status_code=400, detail='Only collected donations can be reviewed')
+    
+    if not donation.proof_photo_url:
+        raise HTTPException(status_code=400, detail='Donation proof photo has not been uploaded')
+    
+    donation.admin_approved = data.approved
+    
+    if data.approved:
+        donation.status='approved'
+        donation.failed_reason = None
+    else:
+        donation.status = 'rejected'
+        donation.failed_reason = data.note
+        
+    db.commit()
+    db.refresh(donation)
+    
+    return donation
+
+
+@router.put('/donations/{donation_id}/complete', response_model=DonationSchema)
+def complete_donation(
+    donation_id: int,
+    db: Session = Depends (get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail='Only admins can complete donations')
+    
+    donation = db.query(DonationModel).filter(DonationModel.id == donation_id).first()
+    
+    if not donation:
+        raise HTTPException(status_code=404, detail='Donation not found')
+    
+    if donation.status != 'approved':
+        raise HTTPException(status_code=400, detail='Only approved donations can be completed')
+    
+    if not donation.admin_approved: 
+        raise HTTPException(status_code=400, detail='Donation proof must be approved first')
+    
+    donation.status = 'completed'
+    
     db.commit()
     db.refresh(donation)
     

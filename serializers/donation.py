@@ -26,6 +26,10 @@ class DonationCollectSchema(BaseModel):
     pickup_successful: bool
     failed_reason: str | None = None
     
+class DonationReviewSchema(BaseModel):
+    approved: bool
+    note: str | None = None
+    
     
 class DonationSchema(BaseModel):
     id: int
