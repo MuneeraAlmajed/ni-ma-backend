@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models.user import UserModel
-from serializers.user import UserSchema, UserRegistrationSchema, UserLoginSchema, UserTokenSchema, UserStatusSchema
+from serializers.user import UserSchema, UserRegistrationSchema, UserLoginSchema, UserTokenSchema, UserStatusSchema, CollectorCreateSchema
 from database import get_db
 from dependencies.get_current_user import get_current_user
 
@@ -110,3 +110,76 @@ def update_user_status(
 
     return found_user
             
+@router.delete('/users/{user_id}', status_code=204)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail='Only admins can delete users')
+    
+    found_user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    
+    if not found_user: 
+        raise HTTPException(status_code=404, detail='User not found')
+    
+    if found_user.role != 'collector':
+        raise HTTPException(status_code=400,detail='Only collectors can be deleted')
+    
+    if found_user.collected_donations:
+        raise HTTPException(status_code=400, detail='Collector cannot be deleted because they have donations on record')
+    
+    db.delete(found_user)
+    db.commit()
+    
+    return
+
+@router.post('/collectors', response_model=UserSchema, status_code=201)
+def create_collector(
+    collector: CollectorCreateSchema,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail='Only admins can create collectors')
+    
+    existing_user = db.query(UserModel).filter(UserModel.username == collector.username).first()
+    
+    if existing_user:
+        raise HTTPException(status_code=400, detail='Username already exists')
+    
+    new_collector = UserModel(
+        name=collector.name,
+        username=collector.username,
+        email=collector.email,
+        phone=collector.phone,
+        role='collector'
+    )
+
+    new_collector.set_password(collector.password)
+    
+    db.add(new_collector)
+    db.commit()
+    db.refresh(new_collector)
+    
+    return new_collector
+
+@router.get('/collectors', response_model=list[UserSchema])
+def get_collectors(
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(
+            status_code=403,
+            detail='Only admins can view collectors'
+        )
+
+    collectors = db.query(UserModel).filter(
+        UserModel.role == 'collector',
+        UserModel.is_active == True
+    ).all()
+
+    return collectors

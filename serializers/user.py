@@ -14,6 +14,13 @@ class UserLoginSchema(BaseModel):
 
 class UserStatusSchema(BaseModel):
     is_active: bool
+    
+class CollectorCreateSchema(BaseModel):
+    name: str
+    username: str
+    email: str
+    phone: str
+    password: str
 
     
 class UserSchema(BaseModel):
@@ -30,3 +37,4 @@ class UserSchema(BaseModel):
 class UserTokenSchema(BaseModel):
     token: str
     message: str
+    
