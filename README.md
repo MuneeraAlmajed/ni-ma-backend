@@ -101,7 +101,7 @@ The main wireframes represent the core user journeys and role-based dashboards o
 | GET | `/api/donations`  | Any | List donations by role (client: own, collector: assigned, admin: all). Filter: `status_filter` |
 | GET | `/api/donations/{id}`  | Client (owner), assigned Collector, Admin | Get donation details |
 | PUT | `/api/donations/{id}`  | Client (owner) | Update pickup address or time (pending only) |
-| PUT | `/api/donations/{id}/cancel`  | Client (owner) | Cancel (pending → cancelled) |
+| DELETE | `/api/donations/{id}/cancel`  | Client (owner) | Cancel (pending → cancelled) |
 | PUT | `/api/donations/{id}/assign`  | Admin | Assign collector (pending → assigned). Body: `collector_id` |
 | PUT | `/api/donations/{id}/collect`  | Assigned Collector | Mark collected (assigned → collected) |
 | POST | `/api/donations/{id}/proof`  | Assigned Collector | Upload proof photo (collected only) |
