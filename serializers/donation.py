@@ -10,6 +10,22 @@ class DonationsCreateSchema(BaseModel):
     preferred_pickup_date: date
     preferred_pickup_time: time
     
+class DonationUpdateSchema(BaseModel):
+    pickup_house: str
+    pickup_road: str
+    pickup_block: str
+    pickup_area: str
+    location: str | None = None
+    preferred_pickup_date: date
+    preferred_pickup_time: time
+    
+class DonationAssignSchema(BaseModel):
+    collector_id: int
+    
+class DonationCollectSchema(BaseModel):
+    pickup_successful: bool
+    failed_reason: str | None = None
+    
     
 class DonationSchema(BaseModel):
     id: int
@@ -30,3 +46,4 @@ class DonationSchema(BaseModel):
     
     class Config:
         orm_mode = True
+        
