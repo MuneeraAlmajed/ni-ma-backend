@@ -19,6 +19,18 @@ class UserModel(BaseModel):
     phone = Column(String, nullable=False)  
     password = Column(String, nullable=False)
     role = Column(String, default='client', nullable=False)
+    
+    donations = relationship(
+        'DonationModel',
+        foreign_keys = 'DonationModel.client_id',
+        back_populates ='client'
+    )
+    
+    colleccted_donations = relationship(
+        'DonationModel',
+        foreign_keys ='DonationModel.collector_id',
+        back_populates='collector'
+    )
 
     def set_password(self, plain_txt_password: str):
         self.password = pwd_context.hash(plain_txt_password)
