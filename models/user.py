@@ -20,6 +20,7 @@ class UserModel(BaseModel):
     password = Column(String, nullable=False)
     role = Column(String, default='client', nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
+    avatar = Column (String, nullable=True)
     
     donations = relationship(
         'DonationModel',

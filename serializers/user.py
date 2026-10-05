@@ -10,7 +10,19 @@ class UserRegistrationSchema(BaseModel):
 
 class UserLoginSchema(BaseModel):
     username: str  
-    password: str  
+    password: str 
+    
+class UserUpdateSchema(BaseModel):
+    name: str 
+    username: str
+    email: str
+    phone: str
+    avatar: str | None = None
+    
+class PasswordUpdateSchema(BaseModel):
+    current_password: str
+    new_password: str
+    
 
 class UserStatusSchema(BaseModel):
     is_active: bool
@@ -30,6 +42,7 @@ class UserSchema(BaseModel):
     email: str
     phone: str
     role: str
+    avatar: str | None
 
     class Config:
         orm_mode = True

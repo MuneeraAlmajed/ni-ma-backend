@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models.user import UserModel
-from serializers.user import UserSchema, UserRegistrationSchema, UserLoginSchema, UserTokenSchema, UserStatusSchema, CollectorCreateSchema
+from serializers.user import UserSchema, UserRegistrationSchema, UserLoginSchema, UserTokenSchema, UserStatusSchema, CollectorCreateSchema, UserUpdateSchema, PasswordUpdateSchema
 from database import get_db
 from dependencies.get_current_user import get_current_user
 
@@ -46,6 +46,51 @@ def login(user: UserLoginSchema, db: Session = Depends(get_db)):
 @router.get('/current_user', response_model=UserSchema)
 def current_user(user: UserSchema = Depends(get_current_user)):
     return user
+@router.put('/auth', response_model=UserSchema)
+def update_profile(
+    data: UserUpdateSchema,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    existing_user = db.query(UserModel).filter(
+        ((UserModel.username == data.username) | (UserModel.email == data.email)),
+        UserModel.id != user.id
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=409,
+            detail='Username or email already exists'
+        )
+
+    user.name = data.name
+    user.username = data.username
+    user.email = data.email
+    user.phone = data.phone
+    user.avatar = data.avatar
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+@router.put('/auth/password')
+def update_password(
+    data: PasswordUpdateSchema,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if not user.verify_password(data.current_password):
+        raise HTTPException(
+            status_code=400,
+            detail='Current password is incorrect'
+        )
+
+    user.set_password(data.new_password)
+
+    db.commit()
+
+    return {"message": "Password updated successfully"}
 
 
 
