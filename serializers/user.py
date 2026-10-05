@@ -13,10 +13,10 @@ class UserLoginSchema(BaseModel):
     password: str 
     
 class UserUpdateSchema(BaseModel):
-    name: str 
-    username: str
-    email: str
-    phone: str
+    name: str | None = None
+    username: str | None = None
+    email: str | None = None
+    phone: str | None = None
     avatar: str | None = None
     
 class PasswordUpdateSchema(BaseModel):
