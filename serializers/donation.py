@@ -42,7 +42,8 @@ class DonationSchema(BaseModel):
     pickup_road: str
     pickup_block: str
     pickup_area: str
-    location: str | None
+    latitude: float | None = None
+    longitude: float | None = None
     preferred_pickup_date: date
     preferred_pickup_time: time
     proof_photo_url: str | None
