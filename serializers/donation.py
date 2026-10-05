@@ -1,6 +1,20 @@
 from pydantic import BaseModel
 from datetime import date, time
 
+
+class ItemSchema(BaseModel):
+    id: int
+    donation_id: int
+    name: str
+    category: str
+    condition: str
+    description: str
+    image_url: str
+
+    class Config:
+        orm_mode = True
+
+
 class DonationsCreateSchema(BaseModel):
     pickup_house: str
     pickup_road: str
@@ -10,7 +24,8 @@ class DonationsCreateSchema(BaseModel):
     longitude: float
     preferred_pickup_date: date
     preferred_pickup_time: time
-    
+
+
 class DonationUpdateSchema(BaseModel):
     pickup_house: str
     pickup_road: str
@@ -20,19 +35,22 @@ class DonationUpdateSchema(BaseModel):
     longitude: float
     preferred_pickup_date: date
     preferred_pickup_time: time
-    
+
+
 class DonationAssignSchema(BaseModel):
     collector_id: int
-    
+
+
 class DonationCollectSchema(BaseModel):
     pickup_successful: bool
     failed_reason: str | None = None
-    
+
+
 class DonationReviewSchema(BaseModel):
     approved: bool
     note: str | None = None
-    
-    
+
+
 class DonationSchema(BaseModel):
     id: int
     client_id: int
@@ -50,7 +68,12 @@ class DonationSchema(BaseModel):
     admin_approved: bool
     pickup_successful: bool
     failed_reason: str | None
-    
+    items: list[ItemSchema] = []
+
     class Config:
         orm_mode = True
-        
+
+
+class PickupResultSchema(BaseModel):
+    pickup_successful: bool
+    failed_reason: str | None = None

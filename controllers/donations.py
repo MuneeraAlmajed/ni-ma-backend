@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
-
+from fastapi import UploadFile, File
 
 from database import get_db
 from dependencies.get_current_user import get_current_user
 from models.donation import DonationModel
-from serializers.donation import DonationSchema, DonationsCreateSchema, DonationUpdateSchema, DonationAssignSchema, DonationCollectSchema, DonationReviewSchema
+from serializers.donation import DonationSchema, DonationsCreateSchema, DonationUpdateSchema, DonationAssignSchema, DonationCollectSchema, DonationReviewSchema, PickupResultSchema
 from models.user import UserModel
 
 import os
+import shutil
 
 router = APIRouter()
 
@@ -168,6 +169,9 @@ def assign_collector(
     
     if donation.status != 'pending':
         raise HTTPException(status_code=400, detail='Only pending donations can be assigned')
+    
+    if donation.status == 'cancelled':
+        raise HTTPException(status_code=400,detail='Cannot assign a cancelled donation')
     
     collector = db.query(UserModel).filter(
         UserModel.id == data.collector_id,
@@ -337,4 +341,266 @@ def delete_donation(
     db.delete(donation)
     db.commit()
     
+
     return
+
+
+@router.get('/collector/donations')
+def get_collector_donations(
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'collector':
+        raise HTTPException(
+            status_code=403,
+            detail='Only collectors can view assigned donations'
+        )
+
+    donations = db.query(DonationModel).filter(
+        DonationModel.collector_id == user.id
+    ).all()
+
+    return donations
+
+@router.put('/collector/donations/{donation_id}/status')
+def update_collector_donation_status(
+    donation_id: int,
+    status: str,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'collector':
+        raise HTTPException(
+            status_code=403,
+            detail='Only collectors can update donation status'
+        )
+
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == donation_id
+    ).first()
+
+    if not donation:
+        raise HTTPException(
+            status_code=404,
+            detail='Donation not found'
+        )
+
+    if donation.collector_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail='You can only update your assigned donations'
+        )
+
+    allowed_statuses = [
+        'assigned',
+        'collected',
+        'failed'
+    ]
+
+    if status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail='Invalid donation status'
+        )
+
+    donation.status = status
+
+    db.commit()
+    db.refresh(donation)
+
+    return donation
+
+@router.put('/collector/donations/{donation_id}/result')
+def update_pickup_result(
+    donation_id: int,
+    data: PickupResultSchema,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'collector':
+        raise HTTPException(
+            status_code=403,
+            detail='Only collectors can update pickup results'
+        )
+
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == donation_id
+    ).first()
+
+    if not donation:
+        raise HTTPException(
+            status_code=404,
+            detail='Donation not found'
+        )
+
+    if donation.collector_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail='You can only update your assigned donations'
+        )
+
+    donation.pickup_successful = data.pickup_successful
+
+    if data.pickup_successful:
+        donation.failed_reason = None
+        donation.status = 'collected'
+    else:
+        donation.failed_reason = data.failed_reason
+        donation.status = 'failed'
+
+    db.commit()
+    db.refresh(donation)
+
+    return donation
+
+@router.post('/collector/donations/{donation_id}/proof')
+def upload_proof_photo(
+    donation_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'collector':
+        raise HTTPException(
+            status_code=403,
+            detail='Only collectors can upload proof photos'
+        )
+
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == donation_id
+    ).first()
+
+    if not donation:
+        raise HTTPException(
+            status_code=404,
+            detail='Donation not found'
+        )
+
+    if donation.collector_id != user.id:
+        raise HTTPException(
+            status_code=403,
+            detail='You can only upload proof for your assigned donations'
+        )
+
+    if not file.content_type or not file.content_type.startswith('image/'):
+        raise HTTPException(
+            status_code=400,
+            detail='Only image files are allowed'
+        )
+
+    os.makedirs('uploads/proof', exist_ok=True)
+
+    file_path = f'uploads/proof/donation_{donation_id}_{file.filename}'
+
+    with open(file_path, 'wb') as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    donation.proof_photo_url = file_path
+
+    db.commit()
+    db.refresh(donation)
+
+    return donation
+
+@router.put('/admin/donations/{donation_id}/assign')
+def assign_collector(
+    donation_id: int,
+    collector_id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(
+            status_code=403,
+            detail='Only admins can assign collectors'
+        )
+
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == donation_id
+    ).first()
+
+    if not donation:
+        raise HTTPException(
+            status_code=404,
+            detail='Donation not found'
+        )
+
+    collector = db.query(UserModel).filter(
+        UserModel.id == collector_id
+    ).first()
+
+    if not collector:
+        raise HTTPException(
+            status_code=404,
+            detail='Collector not found'
+        )
+
+    if collector.role != 'collector':
+        raise HTTPException(
+            status_code=400,
+            detail='Selected user is not a collector'
+        )
+
+    if not collector.is_active:
+        raise HTTPException(
+            status_code=400,
+            detail='Cannot assign an inactive collector'
+        )
+
+    donation.collector_id = collector.id
+    donation.status = 'assigned'
+
+    db.commit()
+    db.refresh(donation)
+
+    return donation
+
+@router.get('/admin/donations')
+def get_admin_donations(
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(
+            status_code=403,
+            detail='Only admins can view donations'
+        )
+
+    donations = db.query(DonationModel).all()
+
+    return donations
+
+@router.delete('/admin/donations/{donation_id}')
+def delete_admin_donation(
+    donation_id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(
+            status_code=403,
+            detail='Only admins can delete donations'
+        )
+
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == donation_id
+    ).first()
+
+    if not donation:
+        raise HTTPException(
+            status_code=404,
+            detail='Donation not found'
+        )
+
+    if donation.status not in ['cancelled', 'failed']:
+        raise HTTPException(
+            status_code=400,
+            detail='Only cancelled or failed donations can be deleted'
+        )
+
+    db.delete(donation)
+    db.commit()
+
+    return {
+        'message': 'Donation deleted successfully'
+    }
