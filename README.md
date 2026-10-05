@@ -85,14 +85,13 @@ The main wireframes represent the core user journeys and role-based dashboards o
 | PUT | `/api/auth`  | Any | Update my name, phone, or area |
 
 ### Items
-| Method | Route | Access | Description |
-|--------|-------|--------|-------------|
-| POST | `/api/items`  | Client | Create an item |
-| GET | `/api/items`  | Client, Admin | List items (client: own, admin: all). Filters: `category`, `condition`, `is_available` |
-| GET | `/api/items/{id}`  | Client (owner), Admin | Get one item |
-| PUT | `/api/items/{id}`  | Client (owner) | Update an item (blocked while it has an active donation) |
-| POST | `/api/items/{id}/image`  | Client (owner) | Upload item photo |
-| DELETE | `/api/items/{id}`  | Client (owner), Admin | Delete an item |
+
+| Method  | Route | Access | Description |
+| ---------- | --------- | ---------- | --------------- |
+| POST | `/api/donations/{donation_id}/items` | Client (owner) | Add an item to a donation |
+| GET | `/api/donations/{donation_id}/items` | Client (owner) | List all items belonging to a donation |
+| PUT | `/api/items/{item_id}` | Client (owner) | Update an item |
+| DELETE | `/api/items/{item_id}` | Client (owner) | Delete an item |
 
 ### Donations
 | Method | Route | Access | Description |
