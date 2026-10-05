@@ -102,7 +102,7 @@ def update_donation(
     if not existing_donation:
         raise HTTPException(status_code=404, detail='Donation not found or you do not have access to it')
     
-    if existing_donation. status != 'pending':
+    if existing_donation.status != 'pending':
         raise HTTPException(status_code=404, detail='Only pending donations can be updated')
     
     existing_donation.pickup_house = donation.pickup_house
