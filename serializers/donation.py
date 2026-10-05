@@ -6,7 +6,8 @@ class DonationsCreateSchema(BaseModel):
     pickup_road: str
     pickup_block: str
     pickup_area: str
-    location: str | None = None
+    latitude: float
+    longitude: float
     preferred_pickup_date: date
     preferred_pickup_time: time
     
@@ -15,7 +16,8 @@ class DonationUpdateSchema(BaseModel):
     pickup_road: str
     pickup_block: str
     pickup_area: str
-    location: str | None = None
+    latitude: float
+    longitude: float
     preferred_pickup_date: date
     preferred_pickup_time: time
     

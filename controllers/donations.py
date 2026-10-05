@@ -24,7 +24,8 @@ def create_donation(
         pickup_road=donation.pickup_road,
         pickup_block=donation.pickup_block,
         pickup_area=donation.pickup_area,
-        location=donation.location,
+        latitude=donation.latitude,
+        longitude=donation.longitude,
         preferred_pickup_date=donation.preferred_pickup_date,
         preferred_pickup_time=donation.preferred_pickup_time
     )
@@ -108,7 +109,8 @@ def update_donation(
     existing_donation.pickup_road = donation.pickup_road
     existing_donation.pickup_block = donation.pickup_block
     existing_donation.pickup_area = donation.pickup_area
-    existing_donation.location = donation.location
+    existing_donation.latitude = donation.latitude
+    existing_donation.longitude = donation.longitude
     existing_donation.preferred_pickup_date = donation.preferred_pickup_date
     existing_donation.preferred_pickup_time = donation.preferred_pickup_time
     

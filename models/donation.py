@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Date, Time, ForeignKey, Boolean, Float
 from sqlalchemy.orm import relationship
 
 from .base import BaseModel
@@ -19,7 +19,8 @@ class DonationModel(BaseModel):
     pickup_road = Column(String, nullable=False)
     pickup_block = Column(String, nullable=False)
     pickup_area = Column(String, nullable=False)
-    location = Column(String, nullable=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
     
     preferred_pickup_date = Column(Date, nullable=False)
     preferred_pickup_time = Column(Time, nullable=False)
