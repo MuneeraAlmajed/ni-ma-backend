@@ -8,6 +8,13 @@ class ItemCreateSchema(BaseModel):
     description: str
     image_url: str
     
+class ItemUpdateSchema(BaseModel):
+    name: str
+    category: str
+    condition: str
+    description: str
+    image_url: str
+    
 class ItemSchema(BaseModel):
     id: int
     donation_id: int
