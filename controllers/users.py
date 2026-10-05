@@ -35,6 +35,9 @@ def login(user: UserLoginSchema, db: Session = Depends(get_db)):
 
     if not db_user or not db_user.verify_password(user.password):
         raise HTTPException(status_code=401, detail="Invalid username or password")
+    
+    if not db_user.is_active:
+        raise HTTPException(status_code=403, detail='Your account is inactive')
 
     token = db_user.generate_token()
 
