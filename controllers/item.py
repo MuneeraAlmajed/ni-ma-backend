@@ -53,6 +53,32 @@ def get_items(
     
     return items
 
+
+@router.get('/items/{item_id}', response_model=ItemSchema)
+def get_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    found_item = db.query(ItemModel).filter(ItemModel.id == item_id).first()
+
+    if not found_item:
+        raise HTTPException(status_code=404, detail='Item not found')
+
+    donation = db.query(DonationModel).filter(
+        DonationModel.id == found_item.donation_id,
+        DonationModel.client_id == user.id
+    ).first()
+
+    if not donation:
+        raise HTTPException(
+            status_code=403,
+            detail='You do not have access to this item'
+        )
+
+    return found_item
+
+
 @router.put('/items/{item_id}', response_model=ItemSchema)
 def update_item(
     item_id: int,
