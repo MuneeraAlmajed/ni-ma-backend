@@ -43,6 +43,7 @@ class UserSchema(BaseModel):
     phone: str
     role: str
     avatar: str | None
+    is_active: bool
 
     class Config:
         orm_mode = True

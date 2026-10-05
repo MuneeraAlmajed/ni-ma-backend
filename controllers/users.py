@@ -46,33 +46,45 @@ def login(user: UserLoginSchema, db: Session = Depends(get_db)):
 @router.get('/current_user', response_model=UserSchema)
 def current_user(user: UserSchema = Depends(get_current_user)):
     return user
+
 @router.put('/auth', response_model=UserSchema)
 def update_profile(
     data: UserUpdateSchema,
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user)
 ):
-    existing_user = db.query(UserModel).filter(
-        ((UserModel.username == data.username) | (UserModel.email == data.email)),
-        UserModel.id != user.id
-    ).first()
+    if data.username or data.email:
+        existing_user = db.query(UserModel).filter(
+            ((UserModel.username == data.username) | (UserModel.email == data.email)),
+            UserModel.id != user.id
+        ).first()
 
-    if existing_user:
-        raise HTTPException(
-            status_code=409,
-            detail='Username or email already exists'
-        )
+        if existing_user:
+            raise HTTPException(
+                status_code=409,
+                detail='Username or email already exists'
+            )
 
-    user.name = data.name
-    user.username = data.username
-    user.email = data.email
-    user.phone = data.phone
-    user.avatar = data.avatar
+    if data.name is not None:
+        user.name = data.name
+
+    if data.username is not None:
+        user.username = data.username
+
+    if data.email is not None:
+        user.email = data.email
+
+    if data.phone is not None:
+        user.phone = data.phone
+
+    if data.avatar is not None:
+        user.avatar = data.avatar
 
     db.commit()
     db.refresh(user)
 
     return user
+
 
 @router.put('/auth/password')
 def update_password(
@@ -127,6 +139,65 @@ def get_user(
     
     return found_user
 
+@router.put('/users/{user_id}', response_model=UserSchema)
+def update_collector(
+    user_id: int,
+    data: UserUpdateSchema,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(get_current_user)
+):
+    if user.role != 'admin':
+        raise HTTPException(
+            status_code=403,
+            detail='Only admins can update collectors'
+        )
+
+    found_user = db.query(UserModel).filter(
+        UserModel.id == user_id
+    ).first()
+
+    if not found_user:
+        raise HTTPException(
+            status_code=404,
+            detail='User not found'
+        )
+
+    if found_user.role != 'collector':
+        raise HTTPException(
+            status_code=400,
+            detail='Only collectors can be updated'
+        )
+
+    if data.username or data.email:
+        existing_user = db.query(UserModel).filter(
+            ((UserModel.username == data.username) |
+             (UserModel.email == data.email)),
+            UserModel.id != user_id
+        ).first()
+
+        if existing_user:
+            raise HTTPException(
+                status_code=409,
+                detail='Username or email already exists'
+            )
+
+    if data.name is not None:
+        found_user.name = data.name
+
+    if data.username is not None:
+        found_user.username = data.username
+
+    if data.email is not None:
+        found_user.email = data.email
+
+    if data.phone is not None:
+        found_user.phone = data.phone
+
+    db.commit()
+    db.refresh(found_user)
+
+    return found_user
+
 @router.put('/users/{user_id}/status', response_model=UserSchema)
 def update_user_status(
     user_id: int,
@@ -157,6 +228,8 @@ def update_user_status(
     db.refresh(found_user)
 
     return found_user
+
+
             
 @router.delete('/users/{user_id}', status_code=204)
 def delete_user(
@@ -226,8 +299,7 @@ def get_collectors(
         )
 
     collectors = db.query(UserModel).filter(
-        UserModel.role == 'collector',
-        UserModel.is_active == True
+        UserModel.role == 'collector'
     ).all()
 
     return collectors
