@@ -79,10 +79,11 @@ The main wireframes represent the core user journeys and role-based dashboards o
 ### Authentication
 | Method | Route | Access | Description |
 |--------|-------|--------|-------------|
-| POST | `/api/auth/register` | Public | Register as client or collector |
-| POST | `/api/auth/login` | Public | Login (form data: `username` = email, `password`), returns JWT |
-| GET | `/api/auth`  | Any | Get my profile |
-| PUT | `/api/auth`  | Any | Update my name, phone, or area |
+| POST | `/api/register` | Public | Register a new client account |
+| POST | `/api/login` | Public | Login with username and password, returns JWT |
+| GET | `/api/current_user` | Any | Get the logged-in user's profile |
+| PUT | `/api/auth` | Any | Update the logged-in user's name, username, email, phone, or avatar |
+| PUT | `/api/auth/password` | Any | Change the logged-in user's password |
 
 ### Items
 
