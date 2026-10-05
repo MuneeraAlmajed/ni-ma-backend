@@ -6,6 +6,10 @@ load_dotenv()
 
 from fastapi import FastAPI
 
+from fastapi.staticfiles import StaticFiles
+
+
+
 # Controllers
 from controllers.users import router as UsersRouter
 from controllers.donations import router as DonationRouter
@@ -13,6 +17,7 @@ from controllers.item import router as ItemRouter
 
 
 app = FastAPI()
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 origins = [
     origin.strip()

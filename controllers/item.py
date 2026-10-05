@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+import os
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -133,3 +136,24 @@ def delete_item(
     db.commit()
     
     return
+
+
+@router.post('/items/upload')
+def upload_item_image(
+    file: UploadFile = File(...),
+    user: UserModel = Depends(get_current_user)
+):
+    file_extension = os.path.splitext(file.filename)[1]
+    file_name = f"{uuid.uuid4()}{file_extension}"
+
+    upload_folder = 'uploads/items'
+    os.makedirs(upload_folder, exist_ok=True)
+
+    file_path = os.path.join(upload_folder, file_name)
+
+    with open(file_path, 'wb') as image:
+        image.write(file.file.read())
+
+    return {
+        'image_url': f'/uploads/items/{file_name}'
+    }
