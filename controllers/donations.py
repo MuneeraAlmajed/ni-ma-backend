@@ -520,7 +520,6 @@ def update_collector_donation_status(
 
     return donation
 
-
 @router.put('/collector/donations/{donation_id}/result')
 def update_pickup_result(
     donation_id: int,
@@ -554,6 +553,12 @@ def update_pickup_result(
         raise HTTPException(
             status_code=400,
             detail='Only assigned donations can have a pickup result'
+        )
+
+    if not data.pickup_successful and not data.failed_reason:
+        raise HTTPException(
+            status_code=400,
+            detail='Please provide a reason for the failed pickup'
         )
 
     donation.pickup_successful = data.pickup_successful
