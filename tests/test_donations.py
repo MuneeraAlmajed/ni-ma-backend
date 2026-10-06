@@ -132,3 +132,64 @@ def test_get_donations(
     assert len(data) == 1
     assert data[0]["status"] == "pending"
     assert data[0]["pickup_area"] == "Juffair"
+
+def test_get_donation(
+    test_app: TestClient,
+    test_db: Session,
+    override_get_db,
+):
+    user_data = {
+        "name": "Single Donation Client",
+        "username": "singleDonationClient123",
+        "email": "single-donation@example.com",
+        "phone": "39000012",
+        "password": "mys3cretp2ssw0rd",
+    }
+
+    register_response = test_app.post(
+        "/api/register",
+        json=user_data,
+    )
+
+    assert register_response.status_code == 201
+
+    headers = login(
+        test_app,
+        "singleDonationClient123",
+        "mys3cretp2ssw0rd",
+    )
+
+    donation_data = {
+        "pickup_house": "50",
+        "pickup_road": "60",
+        "pickup_block": "340",
+        "pickup_area": "Manama",
+        "latitude": 26.2235,
+        "longitude": 50.5876,
+        "preferred_pickup_date": "2026-10-11",
+        "preferred_pickup_time": "11:00:00",
+    }
+
+    create_response = test_app.post(
+        "/api/donations",
+        json=donation_data,
+        headers=headers,
+    )
+
+    assert create_response.status_code == 201
+
+    donation_id = create_response.json()["id"]
+
+    response = test_app.get(
+        f"/api/donations/{donation_id}",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"] == donation_id
+    assert data["pickup_house"] == "50"
+    assert data["pickup_area"] == "Manama"
+    assert data["status"] == "pending"
