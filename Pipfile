@@ -18,9 +18,9 @@ psycopg = "*"
 python-multipart = "*"
 
 [dev-packages]
-pytest = "*"
 starlette = "*"
 httpx = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.12"
