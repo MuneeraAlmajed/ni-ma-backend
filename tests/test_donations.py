@@ -72,3 +72,63 @@ def test_create_donation(
     assert donation.pickup_house == donation_data["pickup_house"]
     assert donation.pickup_area == donation_data["pickup_area"]
     assert donation.status == "pending"
+    
+    
+def test_get_donations(
+    test_app: TestClient,
+    test_db: Session,
+    override_get_db,
+):
+    user_data = {
+        "name": "Donation List Client",
+        "username": "donationListClient123",
+        "email": "donation-list@example.com",
+        "phone": "39000011",
+        "password": "mys3cretp2ssw0rd",
+    }
+
+    register_response = test_app.post(
+        "/api/register",
+        json=user_data,
+    )
+
+    assert register_response.status_code == 201
+
+    headers = login(
+        test_app,
+        "donationListClient123",
+        "mys3cretp2ssw0rd",
+    )
+
+    donation_data = {
+        "pickup_house": "20",
+        "pickup_road": "30",
+        "pickup_block": "340",
+        "pickup_area": "Juffair",
+        "latitude": 26.2186,
+        "longitude": 50.5860,
+        "preferred_pickup_date": "2026-10-10",
+        "preferred_pickup_time": "10:00:00",
+    }
+
+    create_response = test_app.post(
+        "/api/donations",
+        json=donation_data,
+        headers=headers,
+    )
+
+    assert create_response.status_code == 201
+
+    response = test_app.get(
+        "/api/donations",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0]["status"] == "pending"
+    assert data[0]["pickup_area"] == "Juffair"
