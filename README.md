@@ -11,22 +11,28 @@
 NI’MA is a web-based platform that helps people in Bahrain give unwanted but still useful items a second life by connecting Clients who want to donate items with Collectors who handle their collection.
 
 ## Key Features
-- 🔐 User Authentication and Authorization
-- 👥 Role Based Access Control
-- 📦 Item Management
-- 🤝 Donation Management
-- 📋 Donation Status Tracking
-- 🚚 Collector Management
-- 📸 Collection Proof
-- 🛡️ Admin Dashborad
-- 🔄 RESTFul CRUD APIs
-- 🗄️ PostgreSQL Database
-- 📖 API Documentation 
+-  User Authentication and Authorization
+-  Role Based Access Control
+-  Item Management
+-  Donation Management
+-  Donation Status Tracking
+-  Collector Management
+-  Collection Proof
+-  Admin Dashborad
+-  RESTFul CRUD APIs
+-  PostgreSQL Database
+-  API Documentation 
 
 ## Sreenshot of NI'MA 
+<img src="assets/ni-ma-screenshot.jpeg">
 
-## Live Demo 
-🔗 [Visit NI'MA]
+## Project Links
+
+ **Live Website:** [View NI'MA](https://nima-dg6o.onrender.com/)
+
+ **API Documentation:** [View Swagger UI](https://ni-ma-backend.onrender.com/docs)
+
+
 
 
 ## User Stories
@@ -126,10 +132,27 @@ The main wireframes represent the core user journeys and role-based dashboards o
 
 
 ## Attributions
+- Backend project structure and authentication setup were based on the provided FastAPI JWT template.
+- Icons and visual assets used in the project are credited to their respective sources.
 
 ## Technologies Used
+- **FastAPI** – Backend framework and RESTful API development
+- **Python** – Backend programming language
+- **PostgreSQL** – Relational database
+- **SQLAlchemy** – Database ORM
+- **Alembic** – Database migrations
+- **Pydantic** – Data validation and serialization
+- **JWT** – Authentication and authorization
+- **Swagger UI** – API documentation and testing
+- **Git & GitHub** – Version control
 
 ## Future Work
+- Add email notifications for donation and pickup status updates.
+- Add password reset functionality.
+- Improve location and map integration for pickup requests.
+- Add more advanced admin dashboard features.
+- Add additional validation and security improvements.
+- Improve the collection workflow based on user feedback.
 
 
 
