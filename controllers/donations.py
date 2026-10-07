@@ -693,7 +693,7 @@ def assign_collector(
     return donation
 
 
-@router.get('/admin/donations')
+@router.get('/admin/donations', response_model=list[DonationSchema])
 def get_admin_donations(
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user)
