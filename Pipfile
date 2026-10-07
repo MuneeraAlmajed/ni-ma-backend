@@ -16,6 +16,7 @@ pyjwt = "*"
 alembic = "*"
 psycopg = "*"
 python-multipart = "*"
+cloudinary = "*"
 
 [dev-packages]
 starlette = "*"

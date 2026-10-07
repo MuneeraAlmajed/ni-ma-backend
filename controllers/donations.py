@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
+import cloudinary.uploader
 
 from database import get_db
 from dependencies.get_current_user import get_current_user
@@ -307,21 +308,18 @@ def upload_proof(
             detail='Only image files are allowed'
         )
 
-    os.makedirs('uploads/proof', exist_ok=True)
+    result = cloudinary.uploader.upload(
+        file.file,
+        folder="nima/proofs"
+    )
 
-    file_path = f'uploads/proof/donation_{donation_id}_{file.filename}'
-
-    with open(file_path, 'wb') as image:
-        shutil.copyfileobj(file.file, image)
-
-    donation.proof_photo_url = file_path
+    donation.proof_photo_url = result['secure_url']
     donation.status = 'completed'
 
     db.commit()
     db.refresh(donation)
 
     return donation
-
 
 @router.put(
     '/donations/{donation_id}/review',
@@ -625,14 +623,12 @@ def upload_proof_photo(
             detail='Only image files are allowed'
         )
 
-    os.makedirs('uploads/proof', exist_ok=True)
+    result = cloudinary.uploader.upload(
+    file.file,
+    folder="nima/proofs"
+)
 
-    file_path = f'uploads/proof/donation_{donation_id}_{file.filename}'
-
-    with open(file_path, 'wb') as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    donation.proof_photo_url = file_path
+    donation.proof_photo_url = result['secure_url']
     donation.status = 'completed'
 
     db.commit()

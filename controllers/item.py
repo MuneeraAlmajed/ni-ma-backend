@@ -1,5 +1,6 @@
 import os
 import uuid
+import cloudinary.uploader
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
@@ -137,23 +138,16 @@ def delete_item(
     
     return
 
-
 @router.post('/items/upload')
 def upload_item_image(
     file: UploadFile = File(...),
     user: UserModel = Depends(get_current_user)
 ):
-    file_extension = os.path.splitext(file.filename)[1]
-    file_name = f"{uuid.uuid4()}{file_extension}"
-
-    upload_folder = 'uploads/items'
-    os.makedirs(upload_folder, exist_ok=True)
-
-    file_path = os.path.join(upload_folder, file_name)
-
-    with open(file_path, 'wb') as image:
-        image.write(file.file.read())
+    result = cloudinary.uploader.upload(
+        file.file,
+        folder="nima/items"
+    )
 
     return {
-        'image_url': f'/uploads/items/{file_name}'
+        'image_url': result['secure_url']
     }
