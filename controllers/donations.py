@@ -470,8 +470,15 @@ def get_collector_donations(
         DonationModel.collector_id == user.id
     ).all()
 
-    return donations
-
+    return [
+        {
+            **donation.__dict__,
+            "items": donation.items,
+            "client_name": donation.client.name,
+            "client_phone": donation.client.phone
+        }
+        for donation in donations
+    ]
 
 @router.put('/collector/donations/{donation_id}/status')
 def update_collector_donation_status(
