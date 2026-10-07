@@ -260,7 +260,7 @@ def collect_donation(
     donation.failed_reason = data.failed_reason
 
     if data.pickup_successful:
-        donation.status = 'collected'
+        donation.status = 'completed'
     else:
         donation.status = 'failed'
 
