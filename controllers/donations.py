@@ -455,7 +455,7 @@ def delete_donation(
     return
 
 
-@router.get('/collector/donations', response_model=list[DonationSchema])
+@router.get('/collector/donations', response_model=list[AdminDonationSchema])
 def get_collector_donations(
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user)
