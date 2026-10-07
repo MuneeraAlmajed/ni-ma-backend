@@ -54,6 +54,8 @@ class DonationReviewSchema(BaseModel):
 class DonationSchema(BaseModel):
     id: int
     client_id: int
+    client_name: str | None = None
+    client_phone: str | None = None
     collector_id: int | None
     status: str
     pickup_house: str
@@ -72,6 +74,10 @@ class DonationSchema(BaseModel):
 
     class Config:
         orm_mode = True
+        
+class AdminDonationSchema(DonationSchema):
+    client_name: str
+    client_phone: str
 
 
 class PickupResultSchema(BaseModel):

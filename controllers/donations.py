@@ -12,7 +12,8 @@ from serializers.donation import (
     DonationAssignSchema,
     DonationCollectSchema,
     DonationReviewSchema,
-    PickupResultSchema
+    PickupResultSchema,
+    AdminDonationSchema
 )
 
 import os
@@ -692,8 +693,7 @@ def assign_collector(
 
     return donation
 
-
-@router.get('/admin/donations', response_model=list[DonationSchema])
+@router.get('/admin/donations', response_model=list[AdminDonationSchema])
 def get_admin_donations(
     db: Session = Depends(get_db),
     user: UserModel = Depends(get_current_user)
@@ -706,8 +706,30 @@ def get_admin_donations(
 
     donations = db.query(DonationModel).all()
 
-    return donations
-
+    return [
+        {
+            "id": donation.id,
+            "client_id": donation.client_id,
+            "collector_id": donation.collector_id,
+            "status": donation.status,
+            "pickup_house": donation.pickup_house,
+            "pickup_road": donation.pickup_road,
+            "pickup_block": donation.pickup_block,
+            "pickup_area": donation.pickup_area,
+            "latitude": donation.latitude,
+            "longitude": donation.longitude,
+            "preferred_pickup_date": donation.preferred_pickup_date,
+            "preferred_pickup_time": donation.preferred_pickup_time,
+            "proof_photo_url": donation.proof_photo_url,
+            "admin_approved": donation.admin_approved,
+            "pickup_successful": donation.pickup_successful,
+            "failed_reason": donation.failed_reason,
+            "client_name": donation.client.name,
+            "client_phone": donation.client.phone,
+            "items": donation.items
+        }
+        for donation in donations
+    ]
 
 @router.delete('/admin/donations/{donation_id}')
 def delete_admin_donation(
